@@ -1,0 +1,31 @@
+<launch>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find robot_environment)/worlds/empty_world.world"/>
+    </include>
+
+    <param name="robot_description" command="rosrun xacro xacro $(find robot_environment)/urdf/workspace.urdf.xacro"/>
+
+    <!--Load the joint controllers to param server-->
+    <rosparam file="$(find robot_environment)/config/workspace_controller.yaml" command="load"/>
+
+    <!--Load controllers-->
+    <node name="spawner" pkg="controller_manager" type="spawner" respawn="false"
+     output="screen" ns="/mmt_workspace" args="joint_state_controller arm_controller gripper_controller"/>
+    
+    <!--Launch Camera subscriber-->
+    <node pkg="robot_environment" type="camera_vision.py" name="cam_info_receiver_python_node" output="screen"></node>
+
+
+    <!-- convert joint states to TF transforms for rviz, etc -->
+     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+    respawn="false" output="screen">
+        <remap from="/joint_states" to="/mmt_workspace/joint_states" />
+    </node>
+    
+    <!-- Spawn My Robot -->
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" 
+            args="-urdf -param robot_description -model ur5e"/>
+
+
+</launch>

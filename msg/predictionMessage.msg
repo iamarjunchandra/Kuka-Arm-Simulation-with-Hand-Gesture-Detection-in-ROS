@@ -1,0 +1,4 @@
+int16 top_left_image
+int16 top_right_image
+int16 bottom_left_image
+int16 bottom_right_image
